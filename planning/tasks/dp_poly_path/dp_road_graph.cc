@@ -113,7 +113,7 @@ bool DPRoadGraph::FindPathTunnel(
   }
   FrenetFramePath tunnel(frenet_path);
   path_data->SetReferenceLine(&reference_line_);
-  path_data->SetFrenetPath(tunnel);
+  path_data->SetFrenetPath(tunnel);               // 找到cost最低路径之后，path_data的frenet_path_成员=frenet_path，从而传递给下一模块
   return true;
 }
 
@@ -186,9 +186,9 @@ bool DPRoadGraph::GenerateMinCostPath(
     return false;
   }
 
-  std::reverse(min_cost_path->begin(), min_cost_path->end());
+  std::reverse(min_cost_path->begin(), min_cost_path->end());  // 优化结果：min_cost_path
 
-  for (const auto &node : *min_cost_path) {
+  for (const auto &node : *min_cost_path) {                     // min_cost_patht依次进入planning_debug_里面的min_cost_point中
     ADEBUG << "min_cost_path: " << node.sl_point.ShortDebugString();
     planning_debug_->mutable_planning_data()
         ->mutable_dp_poly_graph()
