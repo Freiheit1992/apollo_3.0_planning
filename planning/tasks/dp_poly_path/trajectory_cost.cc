@@ -181,7 +181,7 @@ ComparableCost TrajectoryCost::CalculateDynamicObstacleCost(
     common::SpeedPoint speed_point;
     heuristic_speed_data_.EvaluateByTime(time_stamp, &speed_point);
     float ref_s = speed_point.s() + init_sl_point_.s();
-    if (ref_s < start_s) {
+    if (ref_s < start_s) {                                            //只针对当前的这一段，因为不知道速度，所以必须从t0时刻开始循环
       continue;
     }
     if (ref_s > end_s) {
@@ -199,7 +199,7 @@ ComparableCost TrajectoryCost::CalculateDynamicObstacleCost(
           GetCostBetweenObsBoxes(ego_box, obstacle_trajectory.at(index));
     }
   }
-  constexpr float kDynamicObsWeight = 1e-6;
+  constexpr float kDynamicObsWeight = 1e-6;                       // 权重非常低，相当于忽略动态障碍物
   obstacle_cost.safety_cost *=
       (config_.eval_time_interval() * kDynamicObsWeight);
   return obstacle_cost;
@@ -261,16 +261,16 @@ ComparableCost TrajectoryCost::GetCostBetweenObsBoxes(
     const Box2d &ego_box, const Box2d &obstacle_box) const {
   ComparableCost obstacle_cost;
 
-  const float distance = obstacle_box.DistanceTo(ego_box);
+  const float distance = obstacle_box.DistanceTo(ego_box);    // 循环迭代，每个顶点到另一个box每条边的距离取min
   if (distance > config_.obstacle_ignore_distance()) {
     return obstacle_cost;
   }
 
   obstacle_cost.safety_cost +=
       config_.obstacle_collision_cost() *
-      Sigmoid(config_.obstacle_collision_distance() - distance);
+      Sigmoid(config_.obstacle_collision_distance() - distance);  // obstacle_collision_distance = 0.5m
   obstacle_cost.safety_cost +=
-      20.0 * Sigmoid(config_.obstacle_risk_distance() - distance);
+      20.0 * Sigmoid(config_.obstacle_risk_distance() - distance);  // obstacle_risk_distance = 2m
   return obstacle_cost;
 }
 

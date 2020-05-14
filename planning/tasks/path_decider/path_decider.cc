@@ -86,7 +86,7 @@ bool PathDecider::MakeStaticObstacleDecision(
   const double lateral_stop_radius =
       half_width + FLAGS_static_decision_nudge_l_buffer;
 
-  for (const auto *path_obstacle : path_decision->path_obstacles().Items()) {
+  for (const auto *path_obstacle : path_decision->path_obstacles().Items()) { // 遍历每个障碍物，只考虑自行车、行人和静态障碍物
     const auto &obstacle = *path_obstacle->obstacle();
     bool is_bycycle_or_pedestrain =
         (obstacle.Perception().type() ==
@@ -124,11 +124,11 @@ bool PathDecider::MakeStaticObstacleDecision(
     ObjectDecisionType object_decision;
     object_decision.mutable_ignore();
 
-    const auto &sl_boundary = path_obstacle->PerceptionSLBoundary();
+    const auto &sl_boundary = path_obstacle->PerceptionSLBoundary(); // obstacle每一个角的最大最小s、l
 
     if (sl_boundary.end_s() < frenet_points.front().s() ||
         sl_boundary.start_s() > frenet_points.back().s()) {
-      path_decision->AddLongitudinalDecision("PathDecider/not-in-s",
+      path_decision->AddLongitudinalDecision("PathDecider/not-in-s",  // obs处于轨迹之前或之后
                                              obstacle.Id(), object_decision);
       path_decision->AddLateralDecision("PathDecider/not-in-s", obstacle.Id(),
                                         object_decision);
@@ -138,11 +138,11 @@ bool PathDecider::MakeStaticObstacleDecision(
     const auto frenet_point = frenet_path.GetNearestPoint(sl_boundary);
     const double curr_l = frenet_point.l();
     if (curr_l - lateral_radius > sl_boundary.end_l() ||
-        curr_l + lateral_radius < sl_boundary.start_l()) {
-      // ignore
+        curr_l + lateral_radius < sl_boundary.start_l()) {    // 横向距离较远>4m
+      // ignorefrenet_pathfrenet_pathfrenet_path
       path_decision->AddLateralDecision("PathDecider/not-in-l", obstacle.Id(),
                                         object_decision);
-    } else if (curr_l - lateral_stop_radius < sl_boundary.end_l() &&
+    } else if (curr_l - lateral_stop_radius < sl_boundary.end_l() && //横向距离扣除车宽不足0.5m
                curr_l + lateral_stop_radius > sl_boundary.start_l()) {
       // stop
       *object_decision.mutable_stop() =

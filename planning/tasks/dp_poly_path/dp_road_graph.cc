@@ -448,7 +448,7 @@ bool DPRoadGraph::IsValidCurve(const QuinticPolynomialCurve1d &curve) const {
 
 void DPRoadGraph::GetCurveCost(TrajectoryCost trajectory_cost,
                                const QuinticPolynomialCurve1d &curve,
-                               const float start_s, const float end_s,
+                               const float start_s, const float end_s,      //这个函数没有被调用
                                const uint32_t curr_level,
                                const uint32_t total_level,
                                ComparableCost *cost) {
