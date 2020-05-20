@@ -87,7 +87,7 @@ Status DpStGraph::Search(SpeedData* const speed_data) {
     }
     if (boundary->IsPointInBoundary({0.0, 0.0}) ||
         (std::fabs(boundary->min_t()) < kBounadryEpsilon &&
-         std::fabs(boundary->min_s()) < kBounadryEpsilon)) {
+         std::fabs(boundary->min_s()) < kBounadryEpsilon)) {  // t=0, s=0处于不可行范围，直接返回全0的speed_data
       std::vector<SpeedPoint> speed_profile;
       float t = 0.0;
       for (int i = 0; i < dp_st_speed_config_.matrix_dimension_t();
@@ -103,7 +103,7 @@ Status DpStGraph::Search(SpeedData* const speed_data) {
   }
 
   if (st_graph_data_.st_boundaries().empty()) {
-    ADEBUG << "No path obstacles, dp_st_graph output default speed profile.";
+    ADEBUG << "No path obstacles, dp_st_graph output default speed profile."; //st图中无障碍物
     std::vector<SpeedPoint> speed_profile;
     float s = 0.0;
     float t = 0.0;
@@ -118,7 +118,7 @@ Status DpStGraph::Search(SpeedData* const speed_data) {
       speed_point.set_a(0.0);
       speed_profile.emplace_back(std::move(speed_point));
     }
-    speed_data->set_speed_vector(std::move(speed_profile));
+    speed_data->set_speed_vector(std::move(speed_profile));   // 不考虑限速？？
     return Status::OK();
   }
 
