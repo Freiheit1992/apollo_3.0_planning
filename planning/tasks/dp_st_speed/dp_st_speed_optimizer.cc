@@ -68,8 +68,8 @@ bool DpStSpeedOptimizer::SearchStGraph(
       } else {
         path_decision->Find(id)->SetBlockingObstacle(true);
       }
-      boundaries.push_back(&obstacle->st_boundary());
-    } else if (FLAGS_enable_side_vehicle_st_boundary &&
+      boundaries.push_back(&obstacle->st_boundary());             //把所有obs的st_bound放进boundaries中
+    } else if (FLAGS_enable_side_vehicle_st_boundary &&           // false
                (adc_sl_boundary_.start_l() > 2.0 ||
                 adc_sl_boundary_.end_l() < -2.0)) {
       if (path_decision->Find(id)->reference_line_st_boundary().IsEmpty()) {
@@ -103,7 +103,7 @@ bool DpStSpeedOptimizer::SearchStGraph(
   // step 2 perform graph search
   SpeedLimit speed_limit;
   if (!speed_limit_decider
-           .GetSpeedLimits(path_decision->path_obstacles(), &speed_limit)
+           .GetSpeedLimits(path_decision->path_obstacles(), &speed_limit) //speed_limit存入各s点的速度限值，考虑地图、path曲率、障碍物距离等，最低2.5m/s
            .ok()) {
     AERROR << "Getting speed limits for dp st speed optimizer failed!";
     return false;
@@ -155,7 +155,7 @@ Status DpStSpeedOptimizer::Process(const SLBoundary& adc_sl_boundary,
   auto* debug = reference_line_info_->mutable_debug();
   STGraphDebug* st_graph_debug = debug->mutable_planning_data()->add_st_graph();
 
-  path_decision->EraseStBoundaries();
+  path_decision->EraseStBoundaries();                                     //之前在path_decider中进行了一些lon和lat的决策
   if (boundary_mapper.CreateStBoundary(path_decision).code() ==
       ErrorCode::PLANNING_ERROR) {
     const std::string msg =

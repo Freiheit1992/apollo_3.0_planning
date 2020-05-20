@@ -88,7 +88,7 @@ Status SpeedLimitDecider::GetSpeedLimits(
   CHECK_NOTNULL(speed_limit_data);
 
   std::vector<double> avg_kappa;
-  GetAvgKappa(path_data_.discretized_path().path_points(), &avg_kappa);
+  GetAvgKappa(path_data_.discretized_path().path_points(), &avg_kappa);  // 整条path上每个点的kappa（与前后各1个点取平均）
   const auto& discretized_path_points =
       path_data_.discretized_path().path_points();
   const auto& frenet_path_points = path_data_.frenet_frame_path().points();
@@ -104,7 +104,7 @@ Status SpeedLimitDecider::GetSpeedLimits(
 
     // (1) speed limit from map
     double speed_limit_on_reference_line =
-        reference_line_.GetSpeedLimitFromS(frenet_point_s);
+        reference_line_.GetSpeedLimitFromS(frenet_point_s);   // 包括限速牌
 
     // (2) speed limit from path curvature
     //  -- 2.1: limit by centripetal force (acceleration)
@@ -123,7 +123,7 @@ Status SpeedLimitDecider::GetSpeedLimits(
       const double centri_jerk =
           std::fabs(avg_kappa[i + 1] - avg_kappa[i]) / (ds + kEpsilon);
       centri_jerk_speed_limit = std::fmax(
-          10.0, st_boundary_config_.centri_jerk_speed_coeff() / centri_jerk);
+          10.0, st_boundary_config_.centri_jerk_speed_coeff() / centri_jerk); //不会÷0？最小10m/s
     }
 
     // (3) speed limit from nudge obstacles
@@ -145,7 +145,7 @@ Status SpeedLimitDecider::GetSpeedLimits(
       if (frenet_point_s + vehicle_param_.front_edge_to_center() <
               const_path_obstacle->PerceptionSLBoundary().start_s() ||
           frenet_point_s - vehicle_param_.back_edge_to_center() >
-              const_path_obstacle->PerceptionSLBoundary().end_s()) {
+              const_path_obstacle->PerceptionSLBoundary().end_s()) {  // 超过或还未到obstacle
         continue;
       }
       constexpr double kRange = 1.0;  // meters
@@ -157,7 +157,7 @@ Status SpeedLimitDecider::GetSpeedLimits(
       // obstacle is on the right of ego vehicle (at path point i)
       bool is_close_on_left =
           (nudge.type() == ObjectNudge::LEFT_NUDGE) &&
-          (frenet_point_l - vehicle_param_.right_edge_to_center() - kRange <
+          (frenet_point_l - vehicle_param_.right_edge_to_center() - kRange <  // 横向小于1m
            const_path_obstacle->PerceptionSLBoundary().end_l());
 
       // obstacle is on the left of ego vehicle (at path point i)
@@ -170,10 +170,10 @@ Status SpeedLimitDecider::GetSpeedLimits(
         double nudge_speed_ratio = 1.0;
         if (const_path_obstacle->obstacle()->IsStatic()) {
           nudge_speed_ratio =
-              st_boundary_config_.static_obs_nudge_speed_ratio();
+              st_boundary_config_.static_obs_nudge_speed_ratio();   //0,6
         } else {
           nudge_speed_ratio =
-              st_boundary_config_.dynamic_obs_nudge_speed_ratio();
+              st_boundary_config_.dynamic_obs_nudge_speed_ratio();  //0.8
         }
         nudge_obstacle_speed_limit =
             nudge_speed_ratio * speed_limit_on_reference_line;

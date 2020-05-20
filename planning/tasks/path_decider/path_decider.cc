@@ -142,7 +142,7 @@ bool PathDecider::MakeStaticObstacleDecision(
       // ignorefrenet_pathfrenet_pathfrenet_path
       path_decision->AddLateralDecision("PathDecider/not-in-l", obstacle.Id(),
                                         object_decision);
-    } else if (curr_l - lateral_stop_radius < sl_boundary.end_l() && //横向距离扣除车宽不足0.5m
+    } else if (curr_l - lateral_stop_radius < sl_boundary.end_l() && //横向距离扣除车宽不足0.5m，需要停车
                curr_l + lateral_stop_radius > sl_boundary.start_l()) {
       // stop
       *object_decision.mutable_stop() =
@@ -152,15 +152,15 @@ bool PathDecider::MakeStaticObstacleDecision(
               object_decision.stop(), obstacle.Id(),
               reference_line_info_->reference_line(),
               reference_line_info_->AdcSlBoundary())) {
-        path_decision->AddLongitudinalDecision("PathDecider/nearest-stop",
+        path_decision->AddLongitudinalDecision("PathDecider/nearest-stop",  // 停车点在既有停车点之前，确定新的停车点
                                                obstacle.Id(), object_decision);
       } else {
         ObjectDecisionType object_decision;
         object_decision.mutable_ignore();
-        path_decision->AddLongitudinalDecision("PathDecider/not-nearest-stop",
+        path_decision->AddLongitudinalDecision("PathDecider/not-nearest-stop", // 停车点在既有停车点之后，忽略此障碍物
                                                obstacle.Id(), object_decision);
       }
-    } else if (FLAGS_enable_nudge_decision) {
+    } else if (FLAGS_enable_nudge_decision) {                 // 介于0.5和4m之间的，从旁边绕过
       // nudge
       if (curr_l - lateral_stop_radius > sl_boundary.end_l()) {
         // LEFT_NUDGE

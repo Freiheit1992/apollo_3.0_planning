@@ -78,7 +78,7 @@ bool DPRoadGraph::FindPathTunnel(
   }
 
   std::vector<DPRoadGraphNode> min_cost_path;
-  if (!GenerateMinCostPath(obstacles, &min_cost_path)) {
+  if (!GenerateMinCostPath(obstacles, &min_cost_path)) {  // 主要逻辑
     AERROR << "Fail to generate graph!";
     return false;
   }
@@ -123,7 +123,7 @@ bool DPRoadGraph::GenerateMinCostPath(
   CHECK(min_cost_path != nullptr);
 
   std::vector<std::vector<common::SLPoint>> path_waypoints;
-  if (!SamplePathWaypoints(init_point_, &path_waypoints) || //path_waypoints中存储了撒点矩阵，纵向2排20m、40m，横向7个点1.2-3.5m
+  if (!SamplePathWaypoints(init_point_, &path_waypoints) || //path_waypoints中存储了撒点矩阵，纵向至少2排（排数=v÷5m/s）20m-40m一排，横向7个点1.2-3.5m
       path_waypoints.size() < 1) {
     AERROR << "Fail to sample path waypoints! reference_line_length = "
            << reference_line_.Length();
@@ -269,7 +269,7 @@ bool DPRoadGraph::SamplePathWaypoints(
                           config_.step_length_min(), config_.step_length_max()); // 纵向撒点间距20m~40m（4s行进距离）
 
   const float level_distance =
-      (init_point.v() > FLAGS_max_stop_speed) ? step_length : step_length / 2.0; //V<0.2时，纵向撒点间距/2
+      (init_point.v() > FLAGS_max_stop_speed) ? step_length : step_length / 2.0; //V<0.2时，纵向撒点间距/=2
   float accumulated_s = init_sl_point_.s();
   float prev_s = accumulated_s;
 
