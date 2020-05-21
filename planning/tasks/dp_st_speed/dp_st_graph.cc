@@ -236,7 +236,7 @@ void DpStGraph::GetRowRange(const StGraphPoint& point, int* next_highest_row,
 void DpStGraph::CalculateCostAt(const uint32_t c, const uint32_t r) {
   auto& cost_cr = cost_table_[c][r];
   cost_cr.SetObstacleCost(dp_st_cost_.GetObstacleCost(cost_cr));
-  if (cost_cr.obstacle_cost() > std::numeric_limits<float>::max()) {  // 如果碰撞，cost=Inf > max
+  if (cost_cr.obstacle_cost() > std::numeric_limits<float>::max()) {  // 如果碰撞，cost=Inf > max，否则，离障碍物越近，cost越高
     return;
   }
 
@@ -323,7 +323,7 @@ void DpStGraph::CalculateCostAt(const uint32_t c, const uint32_t r) {
       continue;
     }
 
-    if (!prepre_graph_point.pre_point()) {
+    if (!prepre_graph_point.pre_point()) {                        //c>=3时，prepre_point的pre_point>=0，因此不存在这种情况
       continue;
     }
     const STPoint& triple_pre_point = prepre_graph_point.pre_point()->point();
@@ -336,7 +336,7 @@ void DpStGraph::CalculateCostAt(const uint32_t c, const uint32_t r) {
 
     if (cost < cost_cr.total_cost()) {
       cost_cr.SetTotalCost(cost);
-      cost_cr.SetPrePoint(pre_col[r_pre]);
+      cost_cr.SetPrePoint(pre_col[r_pre]);                      //至此，每个可行点都被遍历到了，cost得到了更新，但有可能某一行之上的点cost全为Inf
     }
   }
 }
