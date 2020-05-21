@@ -73,10 +73,10 @@ DpStGraph::DpStGraph(const StGraphData& st_graph_data,
   dp_st_speed_config_.set_total_path_length(
       std::fmin(dp_st_speed_config_.total_path_length(),
                 st_graph_data_.path_data_length()));
-  unit_s_ = dp_st_speed_config_.total_path_length() /
-            (dp_st_speed_config_.matrix_dimension_s() - 1);
-  unit_t_ = dp_st_speed_config_.total_time() /
-            (dp_st_speed_config_.matrix_dimension_t() - 1);
+  unit_s_ = dp_st_speed_config_.total_path_length() /       // 149
+            (dp_st_speed_config_.matrix_dimension_s() - 1); // 150 - 1
+  unit_t_ = dp_st_speed_config_.total_time() /              // 7
+            (dp_st_speed_config_.matrix_dimension_t() - 1); // 8 - 1
 }
 
 Status DpStGraph::Search(SpeedData* const speed_data) {
@@ -103,7 +103,7 @@ Status DpStGraph::Search(SpeedData* const speed_data) {
   }
 
   if (st_graph_data_.st_boundaries().empty()) {
-    ADEBUG << "No path obstacles, dp_st_graph output default speed profile."; //st图中无障碍物
+    ADEBUG << "No path obstacles, dp_st_graph output default speed profile."; //st图中无障碍物，则返回全为1m/s的8个点，间距1s
     std::vector<SpeedPoint> speed_profile;
     float s = 0.0;
     float t = 0.0;
@@ -143,8 +143,8 @@ Status DpStGraph::Search(SpeedData* const speed_data) {
 }
 
 Status DpStGraph::InitCostTable() {
-  uint32_t dim_s = dp_st_speed_config_.matrix_dimension_s();
-  uint32_t dim_t = dp_st_speed_config_.matrix_dimension_t();
+  uint32_t dim_s = dp_st_speed_config_.matrix_dimension_s();  // 150
+  uint32_t dim_t = dp_st_speed_config_.matrix_dimension_t();  // 8
   DCHECK_GT(dim_s, 2);
   DCHECK_GT(dim_t, 2);
   cost_table_ = std::vector<std::vector<StGraphPoint>>(
@@ -172,7 +172,7 @@ Status DpStGraph::CalculateTotalCost() {
     int highest_row = 0;
     int lowest_row = cost_table_.back().size() - 1;
 
-    for (uint32_t r = next_lowest_row; r <= next_highest_row; ++r) {
+    for (uint32_t r = next_lowest_row; r <= next_highest_row; ++r) {  // 确保t=0时，只有s=0计算cost，t>0时，则是遍历所有s
       if (FLAGS_enable_multi_thread_in_dp_st_graph) {
         PlanningThreadPool::instance()->Push(
             std::bind(&DpStGraph::CalculateCostAt, this, c, r));
@@ -236,32 +236,32 @@ void DpStGraph::GetRowRange(const StGraphPoint& point, int* next_highest_row,
 void DpStGraph::CalculateCostAt(const uint32_t c, const uint32_t r) {
   auto& cost_cr = cost_table_[c][r];
   cost_cr.SetObstacleCost(dp_st_cost_.GetObstacleCost(cost_cr));
-  if (cost_cr.obstacle_cost() > std::numeric_limits<float>::max()) {
+  if (cost_cr.obstacle_cost() > std::numeric_limits<float>::max()) {  // 如果碰撞，cost=Inf > max
     return;
   }
 
   const auto& cost_init = cost_table_[0][0];
   if (c == 0) {
-    DCHECK_EQ(r, 0) << "Incorrect. Row should be 0 with col = 0. row: " << r;
+    DCHECK_EQ(r, 0) << "Incorrect. Row should be 0 with col = 0. row: " << r; // 不会发生
     cost_cr.SetTotalCost(0.0);
     return;
   }
 
   float speed_limit =
-      st_graph_data_.speed_limit().GetSpeedLimitByS(unit_s_ * r);
+      st_graph_data_.speed_limit().GetSpeedLimitByS(unit_s_ * r);  // =1×r
   if (c == 1) {
     const float acc = (r * unit_s_ / unit_t_ - init_point_.v()) / unit_t_;
     if (acc < dp_st_speed_config_.max_deceleration() ||
-        acc > dp_st_speed_config_.max_acceleration()) {
+        acc > dp_st_speed_config_.max_acceleration()) {           // st图中的每个点的total_cost_都初始化为Inf，若提前返回则代表不可行
       return;
     }
 
-    if (CheckOverlapOnDpStGraph(st_graph_data_.st_boundaries(), cost_cr,
+    if (CheckOverlapOnDpStGraph(st_graph_data_.st_boundaries(), cost_cr,  // 与st图中上一时刻的点的连线不能穿过障碍物的投影
                                 cost_init)) {
       return;
     }
     cost_cr.SetTotalCost(cost_cr.obstacle_cost() + cost_init.total_cost() +
-                         CalculateEdgeCostForSecondCol(r, speed_limit));
+                         CalculateEdgeCostForSecondCol(r, speed_limit));    // 总cost=障碍物cost+(acc、jerk)等cost+上一个点的cost
     cost_cr.SetPrePoint(cost_init);
     return;
   }
@@ -269,21 +269,21 @@ void DpStGraph::CalculateCostAt(const uint32_t c, const uint32_t r) {
   constexpr float kSpeedRangeBuffer = 0.20;
   const uint32_t max_s_diff =
       static_cast<uint32_t>(FLAGS_planning_upper_speed_limit *
-                            (1 + kSpeedRangeBuffer) * unit_t_ / unit_s_);
+                            (1 + kSpeedRangeBuffer) * unit_t_ / unit_s_);  //1s内最大可能的前进距离，约30m
   const uint32_t r_low = (max_s_diff < r ? r - max_s_diff : 0);
 
   const auto& pre_col = cost_table_[c - 1];
 
   if (c == 2) {
-    for (uint32_t r_pre = r_low; r_pre <= r; ++r_pre) {
+    for (uint32_t r_pre = r_low; r_pre <= r; ++r_pre) {                 // 不允许倒车，因此只需遍历30m之前到0m的点（每个上一时刻的可能点）
       const float acc =
-          (r * unit_s_ - 2 * r_pre * unit_s_) / (unit_t_ * unit_t_);
+          (r * unit_s_ - 2 * r_pre * unit_s_) / (unit_t_ * unit_t_);     // 上上个点的位置为0，省去
       if (acc < dp_st_speed_config_.max_deceleration() ||
           acc > dp_st_speed_config_.max_acceleration()) {
         continue;
       }
 
-      if (CheckOverlapOnDpStGraph(st_graph_data_.st_boundaries(), cost_cr,
+      if (CheckOverlapOnDpStGraph(st_graph_data_.st_boundaries(), cost_cr,  // 若穿越obstacle则跳过
                                   pre_col[r_pre])) {
         continue;
       }
@@ -293,7 +293,7 @@ void DpStGraph::CalculateCostAt(const uint32_t c, const uint32_t r) {
 
       if (cost < cost_cr.total_cost()) {
         cost_cr.SetTotalCost(cost);
-        cost_cr.SetPrePoint(pre_col[r_pre]);
+        cost_cr.SetPrePoint(pre_col[r_pre]);                            // 将总cost最小的存储下来，作为本点的cost
       }
     }
     return;

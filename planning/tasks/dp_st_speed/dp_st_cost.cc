@@ -109,7 +109,7 @@ float DpStCost::GetObstacleCost(const StGraphPoint& st_graph_point) {
 
   float cost = 0.0;
   for (const auto* obstacle : obstacles_) {
-    if (!obstacle->IsBlockingObstacle()) {
+    if (!obstacle->IsBlockingObstacle()) {  // 除了KEEP_CLEAR之外都是BlockingObstacle
       continue;
     }
 
@@ -122,15 +122,15 @@ float DpStCost::GetObstacleCost(const StGraphPoint& st_graph_point) {
       continue;
     }
     if (obstacle->IsBlockingObstacle() &&
-        boundary.IsPointInBoundary(STPoint(s, t))) {
+        boundary.IsPointInBoundary(STPoint(s, t))) {  //如果st点位于障碍物范围内，cost为Inf
       return kInf;
     }
     double s_upper = 0.0;
     double s_lower = 0.0;
 
     int boundary_index = boundary_map_[boundary.id()];
-    if (boundary_cost_[boundary_index][st_graph_point.index_t()].first < 0.0) {
-      boundary.GetBoundarySRange(t, &s_upper, &s_lower);
+    if (boundary_cost_[boundary_index][st_graph_point.index_t()].first < 0.0) { // Init初始化为-1，<0表明未访问过
+      boundary.GetBoundarySRange(t, &s_upper, &s_lower);                        // 每个障碍物，每个时刻，计算一遍其s上下界
       boundary_cost_[boundary_index][st_graph_point.index_t()] =
           std::make_pair(s_upper, s_lower);
     } else {
@@ -143,7 +143,7 @@ float DpStCost::GetObstacleCost(const StGraphPoint& st_graph_point) {
       if (s + len < s_lower) {
         continue;
       } else {
-        cost += config_.obstacle_weight() * config_.default_obstacle_cost() *
+        cost += config_.obstacle_weight() * config_.default_obstacle_cost() *   //距离障碍物纵向超过3s或20m则cost为0，距离越近cost越高，碰撞则cost为Inf
                 std::pow((len - s_lower + s), 2);
       }
     } else if (s > s_upper) {
