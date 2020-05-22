@@ -177,7 +177,7 @@ Status DpStGraph::CalculateTotalCost() {
         PlanningThreadPool::instance()->Push(
             std::bind(&DpStGraph::CalculateCostAt, this, c, r));
       } else {
-        CalculateCostAt(c, r);
+        CalculateCostAt(c, r);                                        // 利用DP更新cost_table_，每个可行点的cost都得到更新，不可行则为Inf
       }
     }
     if (FLAGS_enable_multi_thread_in_dp_st_graph) {
@@ -189,7 +189,7 @@ Status DpStGraph::CalculateTotalCost() {
       if (cost_cr.total_cost() < std::numeric_limits<float>::infinity()) {
         int h_r = 0;
         int l_r = 0;
-        GetRowRange(cost_cr, &h_r, &l_r);
+        GetRowRange(cost_cr, &h_r, &l_r);                             // 对于每一个可行点，下一时刻的可行点位于一个区域内，即以当前速度和最大/最小加速度能达到的区域
         highest_row = std::max(highest_row, h_r);
         lowest_row = std::min(lowest_row, l_r);
       }
@@ -344,7 +344,7 @@ void DpStGraph::CalculateCostAt(const uint32_t c, const uint32_t r) {
 Status DpStGraph::RetrieveSpeedProfile(SpeedData* const speed_data) {
   float min_cost = std::numeric_limits<float>::infinity();
   const StGraphPoint* best_end_point = nullptr;
-  for (const StGraphPoint& cur_point : cost_table_.back()) {
+  for (const StGraphPoint& cur_point : cost_table_.back()) {  // 最后的时间，即horizon末尾
     if (!std::isinf(cur_point.total_cost()) &&
         cur_point.total_cost() < min_cost) {
       best_end_point = &cur_point;
@@ -353,7 +353,7 @@ Status DpStGraph::RetrieveSpeedProfile(SpeedData* const speed_data) {
   }
 
   for (const auto& row : cost_table_) {
-    const StGraphPoint& cur_point = row.back();
+    const StGraphPoint& cur_point = row.back();            // 最后的距离，即达到最远的规划距离
     if (!std::isinf(cur_point.total_cost()) &&
         cur_point.total_cost() < min_cost) {
       best_end_point = &cur_point;

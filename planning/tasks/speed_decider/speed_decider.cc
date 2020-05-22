@@ -145,7 +145,7 @@ Status SpeedDecider::MakeObjectDecision(
       continue;
     }
 
-    if (path_obstacle->HasLongitudinalDecision()) {
+    if (path_obstacle->HasLongitudinalDecision()) {   // 在Path_decider中已经决策了，停车或忽略
       AppendIgnoreDecision(path_obstacle);
       continue;
     }
