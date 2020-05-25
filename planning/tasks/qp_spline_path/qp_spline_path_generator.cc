@@ -106,7 +106,7 @@ bool QpSplinePathGenerator::Generate(
   double end_s = std::fmin(
       init_frenet_point_.s() +
           std::fmax(kDefaultPathLength,
-                    init_trajectory_point_.v() * FLAGS_look_forward_time_sec),
+                    init_trajectory_point_.v() * FLAGS_look_forward_time_sec),  // 最短50m，8s×当前v
       reference_line_.Length());
 
   constexpr double kMinPathLength = 1.0e-6;
