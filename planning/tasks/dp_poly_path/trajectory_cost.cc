@@ -150,7 +150,7 @@ ComparableCost TrajectoryCost::CalculatePathCost(
   if (curr_level == total_level) {
     const float end_l = curve.Evaluate(0, end_s - start_s);
     path_cost +=
-        std::sqrt(end_l - init_sl_point_.l() / 2.0) * config_.path_end_l_cost();
+        std::sqrt(end_l - init_sl_point_.l() / 2.0) * config_.path_end_l_cost();  // 会不会出现sqrt(<0)??
   }
   cost.smoothness_cost = path_cost;
   return cost;
@@ -181,7 +181,7 @@ ComparableCost TrajectoryCost::CalculateDynamicObstacleCost(
     common::SpeedPoint speed_point;
     heuristic_speed_data_.EvaluateByTime(time_stamp, &speed_point);
     float ref_s = speed_point.s() + init_sl_point_.s();
-    if (ref_s < start_s) {                                            //只针对当前的这一段，因为不知道速度，所以必须从t0时刻开始循环
+    if (ref_s < start_s) {                               //只针对当前的这一段，所以必须从t0时刻开始循环，找到s介于start_s和end_s之间的时刻
       continue;
     }
     if (ref_s > end_s) {
@@ -190,7 +190,7 @@ ComparableCost TrajectoryCost::CalculateDynamicObstacleCost(
 
     const float s = ref_s - start_s;  // s on spline curve
     const float l = curve.Evaluate(0, s);
-    const float dl = curve.Evaluate(1, s);
+    const float dl = curve.Evaluate(1, s);              // 计算出这一时刻的s、l、dl
 
     const common::SLPoint sl = common::util::MakeSLPoint(ref_s, l);
     const Box2d ego_box = GetBoxFromSLPoint(sl, dl);
@@ -245,7 +245,7 @@ ComparableCost TrajectoryCost::GetCostFromObsSL(
   if (delta_l < kSafeDistance) {
     obstacle_cost.safety_cost +=
         config_.obstacle_collision_cost() *
-        Sigmoid(config_.obstacle_collision_distance() - delta_l);
+        Sigmoid(config_.obstacle_collision_distance() - delta_l); // 为什么考虑的是中心点之间的距离？
   }
 
   const float delta_s = std::fabs(

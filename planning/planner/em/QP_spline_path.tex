@@ -53,7 +53,7 @@ $$
 Below is the example for converting the cost function into the QP formulaiton. 
 
 $$
-f_i(s) ＝
+f_i(s) =
 \begin{vmatrix} 1 & s & s^2 & s^3 & s^4 & s^5 \end{vmatrix}
 \cdot
 \begin{vmatrix} a_{i0} \\ a_{i1} \\ a_{i2} \\ a_{i3} \\ a_{i4} \\ a_{i5} \end{vmatrix}   
@@ -87,7 +87,7 @@ $$
 then we have,
 
 $$
-\int\limits_{0}^{d_i} f_i'(s)^2 ds ＝
+\int\limits_{0}^{d_i} f_i'(s)^2 ds =
 \int\limits_{0}^{d_i}
 \begin{vmatrix} a_{i0} & a_{i1} & a_{i2} & a_{i3} & a_{i4} & a_{i5} \end{vmatrix} 
 \cdot  
@@ -103,7 +103,7 @@ $$
 extract the const outside the integration, we have,
 
 $$
-\int\limits_{0}^{d_i} f'(s)^2 ds ＝
+\int\limits_{0}^{d_i} f'(s)^2 ds =
 \begin{vmatrix} a_{i0} & a_{i1} & a_{i2} & a_{i3} & a_{i4} & a_{i5} \end{vmatrix} 
 \cdot 
 \int\limits_{0}^{d_i}  
@@ -114,7 +114,7 @@ $$
 \begin{vmatrix} a_{i0} \\ a_{i1} \\ a_{i2} \\ a_{i3} \\ a_{i4} \\ a_{i5}  \end{vmatrix}
 $$
 $$
-＝\begin{vmatrix} a_{i0} & a_{i1} & a_{i2} & a_{i3} & a_{i4} & a_{i5} \end{vmatrix} 
+=\begin{vmatrix} a_{i0} & a_{i1} & a_{i2} & a_{i3} & a_{i4} & a_{i5} \end{vmatrix} 
 \cdot \int\limits_{0}^{d_i}
 \begin{vmatrix} 
 0  & 0 &0&0&0&0\\ 
@@ -276,9 +276,9 @@ Use $s_0$ = 0 in the equation.
 Similarly calculate the equality constraints for: 
 
 $$
-f'_k(s_k) = f'_{k+1} (s_0)
+f'_k(s_k) = f'_{k+1} (s_0), 
 \\
-f''_k(s_k) = f''_{k+1} (s_0)
+f''_k(s_k) = f''_{k+1} (s_0), 
 \\
 f'''_k(s_k) = f'''_{k+1} (s_0)
 $$

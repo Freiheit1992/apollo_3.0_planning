@@ -255,7 +255,7 @@ bool QpSplinePathGenerator::InitSpline(const double start_s,
   uint32_t number_of_spline = static_cast<uint32_t>(
       (end_s - start_s) / qp_spline_path_config_.max_spline_length() + 1.0);
   number_of_spline = std::max(1u, number_of_spline);
-  common::util::uniform_slice(start_s, end_s, number_of_spline, &knots_);
+  common::util::uniform_slice(start_s, end_s, number_of_spline, &knots_);   // knots_是vector<double>
 
   // spawn a new spline generator
   spline_generator_->Reset(knots_, qp_spline_path_config_.spline_order());
@@ -274,7 +274,7 @@ bool QpSplinePathGenerator::AddConstraint(const QpFrenetFrame& qp_frenet_frame,
       spline_generator_->mutable_spline_constraint();
 
   const int dim =
-      (knots_.size() - 1) * (qp_spline_path_config_.spline_order() + 1);
+      (knots_.size() - 1) * (qp_spline_path_config_.spline_order() + 1); // Q矩阵的大小
   constexpr double param_range = 1e-4;
   for (int i = qp_spline_path_config_.spline_order(); i < dim;
        i += qp_spline_path_config_.spline_order() + 1) {
@@ -455,16 +455,16 @@ void QpSplinePathGenerator::AddKernel() {
   if (init_trajectory_point_.v() < qp_spline_path_config_.uturn_speed_limit() &&
       !is_change_lane_path_ &&
       qp_spline_path_config_.reference_line_weight() > 0.0) {
-    std::vector<double> ref_l(evaluated_s_.size(), -ref_l_);
+    std::vector<double> ref_l(evaluated_s_.size(), -ref_l_);   // 初始位置离中心线距离（变道工况）
     spline_kernel->AddReferenceLineKernelMatrix(
-        evaluated_s_, ref_l, qp_spline_path_config_.reference_line_weight());
+        evaluated_s_, ref_l, qp_spline_path_config_.reference_line_weight()); // 与参考线的距离最小化
   }
 
-  if (qp_spline_path_config_.history_path_weight() > 0.0) {
+  if (qp_spline_path_config_.history_path_weight() > 0.0) {     // 与之前循环path差距最小化，实现方法和上面类似，将上次的path作为参考线
     AddHistoryPathKernel();
   }
 
-  if (qp_spline_path_config_.regularization_weight() > 0.0) {
+  if (qp_spline_path_config_.regularization_weight() > 0.0) {   // 正则化权重，即ai0, ai1, ai2...ai5最小化
     spline_kernel->AddRegularization(
         qp_spline_path_config_.regularization_weight());
   }
@@ -474,7 +474,7 @@ void QpSplinePathGenerator::AddKernel() {
         qp_spline_path_config_.derivative_weight());
     if (std::fabs(init_frenet_point_.l()) >
         qp_spline_path_config_.lane_change_mid_l()) {
-      spline_kernel->AddDerivativeKernelMatrixForSplineK(
+      spline_kernel->AddDerivativeKernelMatrixForSplineK(   // 为保证轨迹的平顺舒适性，第一段轨迹需要额外的权重
           0, qp_spline_path_config_.first_spline_weight_factor() *
                  qp_spline_path_config_.derivative_weight());
     }

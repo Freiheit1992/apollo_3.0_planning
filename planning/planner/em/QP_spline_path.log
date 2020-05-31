@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2020.5.24)  24 MAY 2020 17:32
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2020.5.24)  31 MAY 2020 23:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -102,35 +102,28 @@ Overfull \hbox (14.09505pt too wide) in paragraph at lines 7--8
 tore/detail/tex-
  []
 
-Missing character: There is no ï in font cmr10!
-Missing character: There is no ¼ in font cmr10!
-Missing character: There is no  in font cmr10!
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-Missing character: There is no ï in font cmr10!
-Missing character: There is no ¼ in font cmr10!
-Missing character: There is no  in font cmr10!
-
-Overfull \hbox (33.94757pt too wide) detected at line 99
+Overfull \hbox (46.72252pt too wide) detected at line 99
 [] \OML/cmm/m/it/10.95 f[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 s\OT1/cmr/m/n
-/10.95 )[]\OML/cmm/m/it/10.95 ds [] [] \OMS/cmsy/m/n/10.95 ^^A [] ^^A [] ^^A []
- \OML/cmm/m/it/10.95 ds
+/10.95 )[]\OML/cmm/m/it/10.95 ds \OT1/cmr/m/n/10.95 = [] [] \OMS/cmsy/m/n/10.95
+ ^^A [] ^^A [] ^^A [] \OML/cmm/m/it/10.95 ds
  []
 
-Missing character: There is no ï in font cmr10!
-Missing character: There is no ¼ in font cmr10!
-Missing character: There is no  in font cmr10!
 
-Overfull \hbox (33.94757pt too wide) detected at line 115
+Overfull \hbox (46.72252pt too wide) detected at line 115
 [] \OML/cmm/m/it/10.95 f[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 s\OT1/cmr/m/n
-/10.95 )[]\OML/cmm/m/it/10.95 ds [] \OMS/cmsy/m/n/10.95 ^^A [] [] ^^A [] \OML/c
-mm/m/it/10.95 ds \OMS/cmsy/m/n/10.95 ^^A []
+/10.95 )[]\OML/cmm/m/it/10.95 ds \OT1/cmr/m/n/10.95 = [] \OMS/cmsy/m/n/10.95 ^^
+A [] [] ^^A [] \OML/cmm/m/it/10.95 ds \OMS/cmsy/m/n/10.95 ^^A []
  []
 
-Missing character: There is no ï in font cmr10!
-Missing character: There is no ¼ in font cmr10!
-Missing character: There is no  in font cmr10!
+
+Overfull \hbox (3.1625pt too wide) detected at line 129
+\OT1/cmr/m/n/10.95 = [] \OMS/cmsy/m/n/10.95 ^^A [] [] \OML/cmm/m/it/10.95 ds \O
+MS/cmsy/m/n/10.95 ^^A []
+ []
+
 
 Overfull \hbox (29.28192pt too wide) detected at line 148
 [] \OML/cmm/m/it/10.95 f[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 s\OT1/cmr/m/n
@@ -155,7 +148,7 @@ msfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
 10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><
 /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/s
 hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
-Output written on QP_spline_path.pdf (5 pages, 94319 bytes).
+Output written on QP_spline_path.pdf (5 pages, 94308 bytes).
 PDF statistics:
  52 PDF objects out of 1000 (max. 8388607)
  36 compressed objects within 1 object stream

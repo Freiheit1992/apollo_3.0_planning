@@ -90,7 +90,7 @@ void Spline1dKernel::AddNthDerivativekernelMatrix(const uint32_t n,
             n, num_params, x_knots_[i + 1] - x_knots_[i]) *
         weight;
     kernel_matrix_.block(i * num_params, i * num_params, num_params,
-                         num_params) += cur_kernel;
+                         num_params) += cur_kernel;   // 各阶导数的二次项矩阵加起来（+=）
   }
 }
 

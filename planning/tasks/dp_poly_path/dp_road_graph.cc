@@ -161,7 +161,7 @@ bool DPRoadGraph::GenerateMinCostPath(
             total_level, &trajectory_cost, &(front), &(cur_node)));
 
       } else {
-        UpdateNode(prev_dp_nodes, level, total_level, &trajectory_cost, &front,
+        UpdateNode(prev_dp_nodes, level, total_level, &trajectory_cost, &front, // 计算每个点cost
                    &cur_node);
       }
     }
@@ -188,7 +188,7 @@ bool DPRoadGraph::GenerateMinCostPath(
 
   std::reverse(min_cost_path->begin(), min_cost_path->end());  // 优化结果：min_cost_path
 
-  for (const auto &node : *min_cost_path) {                     // min_cost_patht依次进入planning_debug_里面的min_cost_point中
+  for (const auto &node : *min_cost_path) {                     // min_cost_path依次进入planning_debug_里面的min_cost_point中
     ADEBUG << "min_cost_path: " << node.sl_point.ShortDebugString();
     planning_debug_->mutable_planning_data()
         ->mutable_dp_poly_graph()
@@ -215,7 +215,7 @@ void DPRoadGraph::UpdateNode(const std::list<DPRoadGraphNode> &prev_nodes,
       init_dl = init_frenet_frame_point_.dl();
       init_ddl = init_frenet_frame_point_.ddl();
     }
-    QuinticPolynomialCurve1d curve(prev_sl_point.l(), init_dl, init_ddl,
+    QuinticPolynomialCurve1d curve(prev_sl_point.l(), init_dl, init_ddl,  // 用5次多项式和上一层节点进行连接
                                    cur_point.l(), 0.0, 0.0,
                                    cur_point.s() - prev_sl_point.s());
 

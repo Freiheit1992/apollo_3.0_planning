@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "iterator": "cpp"
-    }
+        "iterator": "cpp",
+        "functional": "cpp"
+    },
+    "python.pythonPath": "/usr/bin/python"
 }
