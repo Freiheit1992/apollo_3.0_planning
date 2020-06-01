@@ -336,7 +336,7 @@ std::vector<SpeedPoint> EMPlanner::GenerateInitSpeedProfile(
         is_updated_start = true;
       }
       SpeedPoint refined_speed_point;
-      refined_speed_point.set_s(speed_point.s() - start_s);
+      refined_speed_point.set_s(speed_point.s() - start_s);       // 比上一帧的结果短一截（一个周期的行驶距离）
       refined_speed_point.set_t(speed_point.t() - start_time);
       refined_speed_point.set_v(speed_point.v());
       refined_speed_point.set_a(speed_point.a());
