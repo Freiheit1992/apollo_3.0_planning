@@ -98,7 +98,7 @@ bool QpSplinePathGenerator::Generate(
   }
 
   if (is_change_lane_path_) {
-    ref_l_ = init_frenet_point_.l();
+    ref_l_ = init_frenet_point_.l();                          // ref_l_仅在变道工况下不为0，代表当前位置在目标车道中的横向偏移。
   }
   double start_s = init_frenet_point_.s();
 
@@ -304,10 +304,10 @@ bool QpSplinePathGenerator::AddConstraint(const QpFrenetFrame& qp_frenet_frame,
   ADEBUG << "init frenet point: " << init_frenet_point_.ShortDebugString();
 
   // add end point constraint, equality constraint
-  double lat_shift = -ref_l_;
+  double lat_shift = -ref_l_;                                      // 不变道时为0
   if (is_change_lane_path_) {
     double lane_change_lateral_shift =
-        GetLaneChangeLateralShift(init_trajectory_point_.v());
+        GetLaneChangeLateralShift(init_trajectory_point_.v());    // 车速越快，lateralShift越小
     lat_shift = std::copysign(
         std::fmin(std::fabs(ref_l_), lane_change_lateral_shift), -ref_l_);
   }

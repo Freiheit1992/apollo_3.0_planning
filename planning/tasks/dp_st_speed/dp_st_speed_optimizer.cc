@@ -167,7 +167,7 @@ Status DpStSpeedOptimizer::Process(const SLBoundary& adc_sl_boundary,
   SpeedLimitDecider speed_limit_decider(adc_sl_boundary, st_boundary_config_,
                                         *reference_line_, path_data);
 
-  if (!SearchStGraph(boundary_mapper, speed_limit_decider, path_data,
+  if (!SearchStGraph(boundary_mapper, speed_limit_decider, path_data,   // 主要逻辑
                      speed_data, path_decision, st_graph_debug)) {
     const std::string msg(Name() +
                           ":Failed to search graph with dynamic programming.");
