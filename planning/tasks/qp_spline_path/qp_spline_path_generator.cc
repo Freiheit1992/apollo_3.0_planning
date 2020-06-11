@@ -379,10 +379,10 @@ bool QpSplinePathGenerator::AddConstraint(const QpFrenetFrame& qp_frenet_frame,
           std::fmax(road_boundary.second, init_frenet_point_.l() + lateral_buf);
     }
     boundary_low.emplace_back(common::util::MaxElement(
-        std::vector<double>{road_boundary.first, static_obs_boundary.first,
+        std::vector<double>{road_boundary.first, static_obs_boundary.first,   //first是右边界，LEFT_NUDGE时更新first
                             dynamic_obs_boundary.first}));
     boundary_high.emplace_back(common::util::MinElement(
-        std::vector<double>{road_boundary.second, static_obs_boundary.second,
+        std::vector<double>{road_boundary.second, static_obs_boundary.second, //second是右边界，RIGHT_NUDGE时更新second
                             dynamic_obs_boundary.second}));
     ADEBUG << "s[" << evaluated_s_[i] << "] boundary_low["
            << boundary_low.back() << "] boundary_high[" << boundary_high.back()

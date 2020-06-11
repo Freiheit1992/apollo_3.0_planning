@@ -117,7 +117,7 @@ bool DpStSpeedOptimizer::SearchStGraph(
       reference_line_info_->path_decision()->path_obstacles().Items(),
       init_point_, adc_sl_boundary_);
 
-  if (!st_graph.Search(speed_data).ok()) {
+  if (!st_graph.Search(speed_data).ok()) {                        // 主逻辑
     AERROR << "failed to search graph with dynamic programming.";
     RecordSTGraphDebug(st_graph_data, st_graph_debug);
     return false;

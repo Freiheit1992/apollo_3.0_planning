@@ -118,7 +118,7 @@ Status DpStGraph::Search(SpeedData* const speed_data) {
       speed_point.set_a(0.0);
       speed_profile.emplace_back(std::move(speed_point));
     }
-    speed_data->set_speed_vector(std::move(speed_profile));   // 不考虑限速？？
+    speed_data->set_speed_vector(std::move(speed_profile));   // 不考虑限速？？QP再考虑？
     return Status::OK();
   }
 
@@ -172,7 +172,7 @@ Status DpStGraph::CalculateTotalCost() {
     int highest_row = 0;
     int lowest_row = cost_table_.back().size() - 1;
 
-    for (uint32_t r = next_lowest_row; r <= next_highest_row; ++r) {  // 确保t=0时，只有s=0计算cost，t>0时，则是遍历所有s
+    for (uint32_t r = next_lowest_row; r <= next_highest_row; ++r) {  // 确保t=0时，只有s=0计算cost，t>0时，则是遍历所有可能的s
       if (FLAGS_enable_multi_thread_in_dp_st_graph) {
         PlanningThreadPool::instance()->Push(
             std::bind(&DpStGraph::CalculateCostAt, this, c, r));

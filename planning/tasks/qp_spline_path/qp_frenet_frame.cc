@@ -253,7 +253,7 @@ bool QpFrenetFrame::MapNudgePolygon(
   const auto corner_size = sl_corners.size();
   for (uint32_t i = 0; i < corner_size; ++i) {
     if (!MapNudgeLine(sl_corners[i], sl_corners[(i + 1) % corner_size],
-                      nudge.type(), bound_map)) {
+                      nudge.type(), bound_map)) {               //  nudge.type()包括ObjectNudge::RIGHT_NUDGE 和LEFT
       AERROR << "Map box line (sl) " << sl_corners[i].DebugString() << "->"
              << sl_corners[(i + 1) % corner_size].DebugString();
       return false;
@@ -291,10 +291,10 @@ bool QpFrenetFrame::MapNudgeLine(
 
     if (nudge_type == ObjectNudge::LEFT_NUDGE) {
       boundary += adc_half_width;
-      (*constraint)[i].first = std::max(boundary, (*constraint)[i].first);
+      (*constraint)[i].first = std::max(boundary, (*constraint)[i].first);    // LEFT_NUDGE更新右边界
     } else {
       boundary -= adc_half_width;
-      (*constraint)[i].second = std::min(boundary, (*constraint)[i].second);
+      (*constraint)[i].second = std::min(boundary, (*constraint)[i].second);  // RIGHT_NUDGE更新左边界
     }
 
     if ((*constraint)[i].second < (*constraint)[i].first + 0.3) {
