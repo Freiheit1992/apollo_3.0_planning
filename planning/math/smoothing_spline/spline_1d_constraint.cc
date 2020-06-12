@@ -572,20 +572,20 @@ bool Spline1dConstraint::AddMonotoneInequalityConstraint(
   Eigen::MatrixXd inequality_constraint = Eigen::MatrixXd::Zero(
       x_coord.size() - 1, (x_knots_.size() - 1) * num_params);
   Eigen::MatrixXd inequality_boundary =
-      Eigen::MatrixXd::Zero(x_coord.size() - 1, 1);
+      Eigen::MatrixXd::Zero(x_coord.size() - 1, 1);             // x_coord -> 31个点
 
-  uint32_t prev_spline_index = FindIndex(x_coord[0]);
+  uint32_t prev_spline_index = FindIndex(x_coord[0]);           // 找离自己最近的前一个分界点
   double prev_rel_x = x_coord[0] - x_knots_[prev_spline_index];
   std::vector<double> prev_coef;
   GeneratePowerX(prev_rel_x, num_params, &prev_coef);
-  for (uint32_t i = 1; i < x_coord.size(); ++i) {
+  for (uint32_t i = 1; i < x_coord.size(); ++i) {             // 第0个点，不需要判断单调性
     uint32_t cur_spline_index = FindIndex(x_coord[i]);
     double cur_rel_x = x_coord[i] - x_knots_[cur_spline_index];
     std::vector<double> cur_coef;
 
     GeneratePowerX(cur_rel_x, num_params, &cur_coef);
     // if constraint on the same spline
-    if (cur_spline_index == prev_spline_index) {
+    if (cur_spline_index == prev_spline_index) {             // 判断该点所在的曲线和上一点是不是同一条
       for (uint32_t j = 0; j < cur_coef.size(); ++j) {
         inequality_constraint(i - 1, cur_spline_index * num_params + j) =
             cur_coef[j] - prev_coef[j];

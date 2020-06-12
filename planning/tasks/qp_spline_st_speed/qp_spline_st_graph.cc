@@ -55,13 +55,13 @@ void QpSplineStGraph::Init() {
   // init knots
   double curr_t = 0.0;
   uint32_t num_spline =
-      qp_st_speed_config_.qp_spline_config().number_of_discrete_graph_t() - 1;
+      qp_st_speed_config_.qp_spline_config().number_of_discrete_graph_t() - 1;  // t_knots_ -> 3个分界点，4段曲线
   for (uint32_t i = 0; i <= num_spline; ++i) {
     t_knots_.push_back(curr_t);
     curr_t += t_knots_resolution_;
   }
 
-  uint32_t num_evaluated_t = 10 * num_spline + 1;
+  uint32_t num_evaluated_t = 10 * num_spline + 1;   // t_evaluated_ -> 31个点
 
   // init evaluated t positions
   curr_t = 0;
@@ -89,11 +89,11 @@ Status QpSplineStGraph::Search(const StGraphData& st_graph_data,
   for (auto boundary : st_graph_data.st_boundaries()) {
     if (boundary->IsPointInBoundary({0.0, 0.0}) ||
         (std::fabs(boundary->min_t()) < kBounadryEpsilon &&
-         std::fabs(boundary->min_s()) < kBounadryEpsilon)) {
+         std::fabs(boundary->min_s()) < kBounadryEpsilon)) {             // 如果(0, 0)处于obs范围内，返回全0的profile
       speed_data->Clear();
       const double t_output_resolution = FLAGS_trajectory_time_min_interval;
       double time = 0.0;
-      while (time < qp_st_speed_config_.total_time() + t_output_resolution) {
+      while (time < qp_st_speed_config_.total_time() + t_output_resolution) { 
         speed_data->AppendSpeedPoint(0.0, time, 0.0, 0.0, 0.0);
         time += t_output_resolution;
       }
@@ -109,17 +109,16 @@ Status QpSplineStGraph::Search(const StGraphData& st_graph_data,
 
   // reset spline generator
   spline_generator_->Reset(
-      t_knots_, qp_st_speed_config_.qp_spline_config().spline_order());
+      t_knots_, qp_st_speed_config_.qp_spline_config().spline_order());   //5阶
 
-  if (!AddConstraint(st_graph_data.init_point(), st_graph_data.speed_limit(),
-                     st_graph_data.st_boundaries(), accel_bound)
-           .ok()) {
+  if (!AddConstraint(st_graph_data.init_point(), st_graph_data.speed_limit(), //约束
+                     st_graph_data.st_boundaries(), accel_bound).ok()) {
     const std::string msg = "Add constraint failed!";
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
 
-  if (!AddKernel(st_graph_data.st_boundaries(), st_graph_data.speed_limit())
+  if (!AddKernel(st_graph_data.st_boundaries(), st_graph_data.speed_limit())  //优化目标
            .ok()) {
     const std::string msg = "Add kernel failed!";
     AERROR << msg;
@@ -158,20 +157,20 @@ Status QpSplineStGraph::AddConstraint(
       spline_generator_->mutable_spline_constraint();
 
   if (!constraint->AddPointConstraint(0.0, 0.0)) {
-    const std::string msg = "add st start point constraint failed";
+    const std::string msg = "add st start point constraint failed";         //初始点位置约束
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
 
   if (!constraint->AddPointDerivativeConstraint(0.0, init_point_.v())) {
-    const std::string msg = "add st start point velocity constraint failed!";
+    const std::string msg = "add st start point velocity constraint failed!";  //初始点速度约束
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
 
   // monotone constraint
   if (!constraint->AddMonotoneInequalityConstraint(t_evaluated_)) {
-    const std::string msg = "add monotone inequality constraint failed!";
+    const std::string msg = "add monotone inequality constraint failed!";   //单调性约束（不能倒车）
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
@@ -281,12 +280,12 @@ Status QpSplineStGraph::AddKernel(
     const SpeedLimit& speed_limit) {
   Spline1dKernel* spline_kernel = spline_generator_->mutable_spline_kernel();
 
-  if (qp_st_speed_config_.qp_spline_config().accel_kernel_weight() > 0) {
+  if (qp_st_speed_config_.qp_spline_config().accel_kernel_weight() > 0) {   // acc最小
     spline_kernel->AddSecondOrderDerivativeMatrix(
         qp_st_speed_config_.qp_spline_config().accel_kernel_weight());
   }
 
-  if (qp_st_speed_config_.qp_spline_config().jerk_kernel_weight() > 0) {
+  if (qp_st_speed_config_.qp_spline_config().jerk_kernel_weight() > 0) {   // jerk最小
     spline_kernel->AddThirdOrderDerivativeMatrix(
         qp_st_speed_config_.qp_spline_config().jerk_kernel_weight());
   }
@@ -294,23 +293,23 @@ Status QpSplineStGraph::AddKernel(
   if (!AddCruiseReferenceLineKernel(
            qp_st_speed_config_.qp_spline_config().cruise_weight())
            .ok()) {
-    return Status(ErrorCode::PLANNING_ERROR, "QpSplineStGraph::AddKernel");
+    return Status(ErrorCode::PLANNING_ERROR, "QpSplineStGraph::AddKernel");   // 每个分界点的s尽量大（与total_path_length作比较），即车速尽量快
   }
 
-  if (!AddFollowReferenceLineKernel(
-           boundaries, qp_st_speed_config_.qp_spline_config().follow_weight())
+  if (!AddFollowReferenceLineKernel(  
+           boundaries, qp_st_speed_config_.qp_spline_config().follow_weight())// 与按安全距离跟随障碍物的ref_s最接近，若无跟随障碍物则不优化
            .ok()) {
     return Status(ErrorCode::PLANNING_ERROR, "QpSplineStGraph::AddKernel");
   }
 
   if (!AddYieldReferenceLineKernel(
-           boundaries, qp_st_speed_config_.qp_spline_config().yield_weight())
+           boundaries, qp_st_speed_config_.qp_spline_config().yield_weight())// 与按安全距离让行障碍物的ref_s最接近，若无让行障碍物则不优化
            .ok()) {
     return Status(ErrorCode::PLANNING_ERROR, "QpSplineStGraph::AddKernel");
   }
 
   if (!AddDpStReferenceKernel(
-          qp_st_speed_config_.qp_spline_config().dp_st_reference_weight())) {
+          qp_st_speed_config_.qp_spline_config().dp_st_reference_weight())) {// 与DP规划结果最接近
     return Status(ErrorCode::PLANNING_ERROR, "QpSplineStGraph::AddKernel");
   }
 
@@ -336,7 +335,7 @@ Status QpSplineStGraph::Solve() {
 
 Status QpSplineStGraph::AddCruiseReferenceLineKernel(const double weight) {
   auto* spline_kernel = spline_generator_->mutable_spline_kernel();
-  double dist_ref = qp_st_speed_config_.total_path_length();
+  double dist_ref = qp_st_speed_config_.total_path_length();    //250m
   for (uint32_t i = 0; i < t_evaluated_.size(); ++i) {
     cruise_.push_back(dist_ref);
   }
@@ -359,7 +358,7 @@ Status QpSplineStGraph::AddCruiseReferenceLineKernel(const double weight) {
   if (t_evaluated_.size() > 0) {
     spline_kernel->AddReferenceLineKernelMatrix(
         t_evaluated_, cruise_,
-        weight * qp_st_speed_config_.total_time() / t_evaluated_.size());
+        weight * qp_st_speed_config_.total_time() / t_evaluated_.size());   // 每个分界点的s与250m作比较
   }
 
   return Status::OK();
@@ -374,8 +373,8 @@ Status QpSplineStGraph::AddFollowReferenceLineKernel(
     const double curr_t = t_evaluated_[i];
     double s_min = std::numeric_limits<double>::infinity();
     bool success = false;
-    for (const auto* boundary : boundaries) {
-      if (boundary->boundary_type() != StBoundary::BoundaryType::FOLLOW) {
+    for (const auto* boundary : boundaries) {                                 //每个时间点再遍历所有的obs_boundaries
+      if (boundary->boundary_type() != StBoundary::BoundaryType::FOLLOW) {    //若obs的决策为follow
         continue;
       }
       if (curr_t < boundary->min_t() || curr_t > boundary->max_t()) {
@@ -391,7 +390,7 @@ Status QpSplineStGraph::AddFollowReferenceLineKernel(
                 qp_st_speed_config_.qp_spline_config().follow_drag_distance());
       }
     }
-    if (success && s_min < cruise_[i]) {
+    if (success && s_min < cruise_[i]) {                                      // 若t时刻没有follow的障碍物，则不对t时刻作此项优化
       filtered_evaluate_t.push_back(curr_t);
       ref_s.push_back(s_min);
       if (st_graph_debug_) {
@@ -406,7 +405,7 @@ Status QpSplineStGraph::AddFollowReferenceLineKernel(
   if (!ref_s.empty()) {
     spline_kernel->AddReferenceLineKernelMatrix(
         filtered_evaluate_t, ref_s,
-        weight * qp_st_speed_config_.total_time() / t_evaluated_.size());
+        weight * qp_st_speed_config_.total_time() / t_evaluated_.size());   // 与跟随profile的偏差最小化
   }
 
   for (std::size_t i = 0; i < filtered_evaluate_t.size(); ++i) {
@@ -472,7 +471,7 @@ bool QpSplineStGraph::AddDpStReferenceKernel(const double weight) const {
   auto* spline_kernel = spline_generator_->mutable_spline_kernel();
   if (!t_pos.empty()) {
     spline_kernel->AddReferenceLineKernelMatrix(
-        t_pos, s_pos, weight * qp_st_speed_config_.total_time() / t_pos.size());
+        t_pos, s_pos, weight * qp_st_speed_config_.total_time() / t_pos.size());  // 与DP规划结果最接近
   }
   return true;
 }

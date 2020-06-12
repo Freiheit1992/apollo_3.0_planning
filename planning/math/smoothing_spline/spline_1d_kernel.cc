@@ -85,10 +85,8 @@ void Spline1dKernel::AddNthDerivativekernelMatrix(const uint32_t n,
   const uint32_t num_params = spline_order_ + 1;
   for (uint32_t i = 0; i + 1 < x_knots_.size(); ++i) {
     Eigen::MatrixXd cur_kernel =
-        2 *
-        SplineSegKernel::instance()->NthDerivativeKernel(
-            n, num_params, x_knots_[i + 1] - x_knots_[i]) *
-        weight;
+        2 * SplineSegKernel::instance()->NthDerivativeKernel(
+            n, num_params, x_knots_[i + 1] - x_knots_[i]) * weight;
     kernel_matrix_.block(i * num_params, i * num_params, num_params,
                          num_params) += cur_kernel;   // 各阶导数的二次项矩阵加起来（+=）
   }

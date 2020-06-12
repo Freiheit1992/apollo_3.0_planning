@@ -159,7 +159,7 @@ Status QpSplineStSpeedOptimizer::Process(const SLBoundary& adc_sl_boundary,
 
   std::pair<double, double> accel_bound = {
       qp_st_speed_config_.preferred_min_deceleration(),
-      qp_st_speed_config_.preferred_max_acceleration()};
+      qp_st_speed_config_.preferred_max_acceleration()};      // [-3.3, 2.5]
   st_graph.SetDebugLogger(st_graph_debug);
   auto ret = st_graph.Search(st_graph_data, accel_bound, reference_speed_data,
                              speed_data);
@@ -168,7 +168,7 @@ Status QpSplineStSpeedOptimizer::Process(const SLBoundary& adc_sl_boundary,
               "secondary choice instead.";
 
     accel_bound.first = qp_st_speed_config_.min_deceleration();
-    accel_bound.second = qp_st_speed_config_.max_acceleration();
+    accel_bound.second = qp_st_speed_config_.max_acceleration();// [-4.0, 3.0]
     ret = st_graph.Search(st_graph_data, accel_bound, reference_speed_data,
                           speed_data);
 

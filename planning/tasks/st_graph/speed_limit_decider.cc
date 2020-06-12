@@ -111,7 +111,7 @@ Status SpeedLimitDecider::GetSpeedLimits(
     const double centri_acc_speed_limit =
         std::sqrt(GetCentricAccLimit(std::fabs(avg_kappa[i])) /
                   std::fmax(std::fabs(avg_kappa[i]),
-                            st_boundary_config_.minimal_kappa()));
+                            st_boundary_config_.minimal_kappa()));  // kappa导致的限速 = v^2/kappa = v^2/a
 
     // -- 2.2: limit by centripetal jerk
     double centri_jerk_speed_limit = std::numeric_limits<double>::max();
@@ -121,7 +121,7 @@ Status SpeedLimitDecider::GetSpeedLimits(
       DCHECK_GE(ds, 0.0);
       const double kEpsilon = 1e-9;
       const double centri_jerk =
-          std::fabs(avg_kappa[i + 1] - avg_kappa[i]) / (ds + kEpsilon);
+          std::fabs(avg_kappa[i + 1] - avg_kappa[i]) / (ds + kEpsilon);    // kappa_d导致的限速
       centri_jerk_speed_limit = std::fmax(
           10.0, st_boundary_config_.centri_jerk_speed_coeff() / centri_jerk); //不会÷0？最小10m/s
     }
@@ -170,10 +170,10 @@ Status SpeedLimitDecider::GetSpeedLimits(
         double nudge_speed_ratio = 1.0;
         if (const_path_obstacle->obstacle()->IsStatic()) {
           nudge_speed_ratio =
-              st_boundary_config_.static_obs_nudge_speed_ratio();   //0,6
+              st_boundary_config_.static_obs_nudge_speed_ratio();   //静态障碍物，60%限速通过
         } else {
           nudge_speed_ratio =
-              st_boundary_config_.dynamic_obs_nudge_speed_ratio();  //0.8
+              st_boundary_config_.dynamic_obs_nudge_speed_ratio();  //动态障碍物，80%限速通过
         }
         nudge_obstacle_speed_limit =
             nudge_speed_ratio * speed_limit_on_reference_line;
