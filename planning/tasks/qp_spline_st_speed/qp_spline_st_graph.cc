@@ -170,13 +170,13 @@ Status QpSplineStGraph::AddConstraint(
 
   // monotone constraint
   if (!constraint->AddMonotoneInequalityConstraint(t_evaluated_)) {
-    const std::string msg = "add monotone inequality constraint failed!";   //单调性约束（不能倒车）
+    const std::string msg = "add monotone inequality constraint failed!";   //单调性约束（不能倒车）（30个点
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
 
   // smoothness constraint
-  if (!constraint->AddThirdDerivativeSmoothConstraint()) {
+  if (!constraint->AddThirdDerivativeSmoothConstraint()) {                // 分界点连续性约束（4个点
     const std::string msg = "add smoothness joint constraint failed!";
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
@@ -200,7 +200,7 @@ Status QpSplineStGraph::AddConstraint(
 
   DCHECK_EQ(t_evaluated_.size(), s_lower_bound.size());
   DCHECK_EQ(t_evaluated_.size(), s_upper_bound.size());
-  if (!constraint->AddBoundary(t_evaluated_, s_lower_bound, s_upper_bound)) {
+  if (!constraint->AddBoundary(t_evaluated_, s_lower_bound, s_upper_bound)) {// s处于边界内约束（30个点
     const std::string msg = "Fail to apply distance constraints.";
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
@@ -229,7 +229,7 @@ Status QpSplineStGraph::AddConstraint(
     }
   }
 
-  if (!constraint->AddDerivativeBoundary(t_evaluated_, speed_lower_bound,
+  if (!constraint->AddDerivativeBoundary(t_evaluated_, speed_lower_bound,// v处于范围内约束（30个点
                                          speed_upper_bound)) {
     const std::string msg = "Fail to apply speed constraints.";
     AERROR << msg;
@@ -261,7 +261,7 @@ Status QpSplineStGraph::AddConstraint(
 
   DCHECK_EQ(t_evaluated_.size(), accel_lower_bound.size());
   DCHECK_EQ(t_evaluated_.size(), accel_upper_bound.size());
-  if (!constraint->AddSecondDerivativeBoundary(t_evaluated_, accel_lower_bound,
+  if (!constraint->AddSecondDerivativeBoundary(t_evaluated_, accel_lower_bound,// a处于范围内约束（30个点
                                                accel_upper_bound)) {
     const std::string msg = "Fail to apply acceleration constraints.";
     return Status(ErrorCode::PLANNING_ERROR, msg);
@@ -537,7 +537,7 @@ Status QpSplineStGraph::EstimateSpeedUpperBound(
   if (static_cast<double>(t_evaluated_.size() +
                           speed_limit.speed_limit_points().size()) <
       t_evaluated_.size() * std::log(static_cast<double>(
-                                speed_limit.speed_limit_points().size()))) {
+                                speed_limit.speed_limit_points().size()))) {  // 如果限速点数量不是远大于采样点
     uint32_t i = 0;
     uint32_t j = 0;
     while (i < t_evaluated_.size() &&
